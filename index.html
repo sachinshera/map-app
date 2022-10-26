@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map App</title>
+    <link rel="stylesheet" href="libraries/bootstrap.min.css">
+    <link rel="stylesheet" href="libraries/mapbox-gl.css">
+    <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+    <!-- content -->
+
+    <section class="container shadow rounded">
+
+        <!-- map box -->
+        <div class="">
+            <div id='map' style='width: 500px; height: 500px;'></div>
+        </div>
+        <div class="row info-box">
+            <div class="col-6">
+                <div class="title">
+                    <strong class="text-title">
+                        Having great time with family
+                    </strong>
+                </div>
+                <div class="description">
+                    <small class="text-description">
+                        having great time with family and friends in the park and enjoying the weather and the view of
+                        the city
+                    </small>
+                </div>
+            </div>
+
+            <div class="col-6 text-right">
+                <div class="place">
+                    <b class="text-place">
+                        Patna
+                    </b>
+                </div>
+                <div class="cordinations">
+                    <small class="text-cordinates">
+                        25.5941° N, 85.1376° E
+                    </small>
+                </div>
+                <div class="date">
+                    <small class="text-date">
+                        26-10-2022
+                    </small>
+                </div>
+            </div>
+        </div>
+        <form action="index.html" method="GET" class="w-100">
+            <!-- create a form that have title description , location cordinated , place and date  -->
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" class="form-control" id="title" name="title" placeholder="Enter Title" required
+                    value=" Having great time with family">
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3" required>
+                    having great time with family and friends in the park and enjoying the weather and the view of
+                        the city
+                </textarea>
+            </div>
+            <div class="form-group">
+                <label for="place">Place</label>
+                <input type="text" class="form-control" id="place" name="place" placeholder="Enter Place" value="Patna"
+                    required>
+            </div>
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" class="form-control" id="date" name="date" placeholder="Enter Date"
+                    value="24-10-2022" required>
+            </div>
+            <div class="form-group">
+                <label for="cordinates">Cordinates</label>
+                <input type="text" class="form-control" id="cordinates" name="cordinates" placeholder="Enter Cordinates"
+                    required value="LngLat(85.12995380470068, 25.605713925698794)">
+            </div>
+            <button type="submit" class="btn btn-primary my-2 ">Apply</button>
+
+        </form>
+
+        <!-- map box -->
+    </section>
+
+
+    <!-- content -->
+
+    <script src="libraries/jquery.min.js"></script>
+    <script src="libraries/bootstrap.bundle.min.js"></script>
+    <script src="libraries/mustache.min.js"></script>
+    <script src="libraries/mapbox-gl.js"></script>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2FjaGluc2hlcmEiLCJhIjoiY2w5cGRhYWZkMG5hczQxazQydDMzbXJoYiJ9.RZxXH2XPWa8gXjsjbS0NqQ';
+        const map = new mapboxgl.Map({
+            container: 'map', // container ID
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [85.13764424277042, 25.594072215470547],
+            zoom: 9,
+            projection: 'globe'
+        });
+        map.on('style.load', () => {
+            map.setFog({});
+        });
+        // set current location
+        map.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true
+        }));
+
+        // set navigation control
+        map.addControl(new mapboxgl.NavigationControl());
+
+        // show location by cordination in form 
+        map.on('click', function (e) {
+            document.getElementById('cordinates').value = e.lngLat;
+        });
+
+
+        // apply form data to map when form is submitted
+        $('form').submit(function (e) {
+            e.preventDefault();
+            //remove previous marker
+            if (map.getLayer('marker')) {
+                map.removeLayer('marker');
+                map.removeSource('marker');
+            }
+            const title = $('#title').val();
+            const description = $('#description').val();
+            const place = $('#place').val();
+            const date = $('#date').val();
+            const cordinates = $('#cordinates').val();
+            const cordinatesArray = cordinates.split(',');
+            const lng = cordinatesArray[0].split('(')[1];
+            const lat = cordinatesArray[1].split(')')[0];
+            const popup = new mapboxgl.Popup({
+                offset: 25
+            });
+
+            //set html
+            $(".text-title").html(title);
+            $(".text-description").html(description);
+            $(".text-place").html(place);
+            $(".text-date").html(date);
+            $(".text-cordinates").html(cordinates);
+
+            const marker = new mapboxgl.Marker()
+                .setLngLat([lng, lat])
+                .setPopup(popup)
+                .addTo(map);
+
+            // rerender map
+            map.resize();
+        });
+    </script>
+</body>
+
+</html>
